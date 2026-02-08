@@ -1,0 +1,16 @@
+{
+  "name": "instal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "tailwind": "tailwindcss -i ./input.css -o ./output.css --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "alpinejs": "^3.15.8",
+    "tailwindcss": "^4.1.18"
+  }
+}

@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>University Software Portal</title>
+
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+     <link rel="stylesheet" href="output.css" />
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
+      body { 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      
+      [x-cloak] { 
+        display: none !important; 
+      }
+
+      .gradient-bg {
+        background: linear-gradient(to right, #0f172a, #334155);
+      }
+
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-4px);
+      }
+    </style>
+  </head>
+
+  <body class="antialiased bg-gray-50" x-data="portal()">
+    <div class="min-h-screen">
+      
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 class="text-xl font-semibold text-gray-900">University Software Portal</h1>
+                <p class="text-sm text-gray-500 hidden sm:block">Download & install software with ease</p>
+              </div>
+            </div>
+            
+            <button 
+              x-show="activePage === 'detail'" 
+              @click="back()" 
+              class="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
+              x-cloak
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Back</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Home View -->
+        <div x-show="activePage === 'home'" x-cloak>
+          
+          <!-- Hero Section -->
+          <div class="gradient-bg rounded-2xl p-8 md:p-12 mb-8 text-white">
+            <div class="max-w-3xl">
+              <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                Install any application in seconds
+              </h2>
+              <p class="text-lg text-white/90 mb-6">
+                Download essential software for your courses with step-by-step tutorials and instant access.
+              </p>
+              <div class="flex items-center space-x-2 text-sm text-white/80">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span><strong x-text="programs.length"></strong> programs available</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="mb-8">
+            <div class="relative max-w-xl">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input 
+                type="search" 
+                x-model="search" 
+                placeholder="Search programs (e.g., MATLAB, VS Code, Python...)" 
+                class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <!-- Programs Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="p in filteredPrograms" :key="p.id">
+              <div 
+                @click="viewProgram(p)" 
+                class="card-hover cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden"
+              >
+                <div class="p-6">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="p.name"></h3>
+                        <p class="text-sm text-gray-500" x-text="'Version ' + p.version"></p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-sm text-gray-600">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span x-text="p.os"></span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
+                      <span x-text="p.size"></span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-700 font-medium">View Tutorial →</span>
+                    <button 
+                      @click.stop="downloadProgram(p)"
+                      class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Empty State -->
+          <div 
+            x-show="filteredPrograms.length === 0" 
+            class="mt-12 text-center py-16"
+            x-cloak
+          >
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No programs found</h3>
+            <p class="mt-2 text-sm text-gray-500">Try adjusting your search or browse all available programs.</p>
+            <button 
+              @click="search = ''" 
+              class="mt-4 px-4 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800"
+            >
+              Clear Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail View -->
+        <div x-show="activePage === 'detail'" x-cloak>
+          <template x-if="selected">
+            <div>
+              <!-- Header -->
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between">
+                  <div class="flex items-start space-x-4 mb-4 md:mb-0">
+                    <div class="w-16 h-16 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 class="text-2xl font-bold text-gray-900" x-text="selected.name"></h2>
+                      <p class="text-sm text-gray-500 mt-1">Version <span x-text="selected.version"></span></p>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                          <span x-text="selected.os"></span>
+                        </span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <span x-text="selected.size"></span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    @click="downloadProgram(selected)"
+                    class="w-full md:w-auto px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    <span>Download Now</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Content Grid -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Main Content -->
+                <div class="lg:col-span-2 space-y-6">
+                  
+                  <!-- Video -->
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-900 aspect-video flex items-center justify-center">
+                      <template x-if="selected.videoUrl && selected.videoUrl.includes('youtube')">
+                        <iframe 
+                          :src="selected.videoUrl" 
+                          class="w-full h-full" 
+                          frameborder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowfullscreen
+                        ></iframe>
+                      </template>
+                      <template x-if="selected.videoUrl && !selected.videoUrl.includes('youtube')">
+                        <video controls class="w-full h-full" :src="selected.videoUrl"></video>
+                      </template>
+                      <template x-if="!selected.videoUrl">
+                        <div class="text-center text-white">
+                          <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <p class="text-gray-400">No video tutorial available</p>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Installation Steps -->
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <svg class="w-5 h-5 mr-2 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                      Installation Tutorial
+                    </h3>
+                    <template x-if="selected.steps && selected.steps.length > 0">
+                      <ol class="space-y-4">
+                        <template x-for="(step, idx) in selected.steps" :key="idx">
+                          <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-700 rounded-full font-semibold text-sm mr-3" x-text="idx + 1"></span>
+                            <p class="text-gray-700 pt-1" x-text="step"></p>
+                          </li>
+                        </template>
+                      </ol>
+                    </template>
+                    <template x-if="!selected.steps || selected.steps.length === 0">
+                      <p class="text-gray-500">No installation steps available for this program.</p>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="space-y-6">
+                  
+                  <!-- Quick Info -->
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Info</h3>
+                    <dl class="space-y-4">
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">File Size</dt>
+                        <dd class="text-base text-gray-900" x-text="selected.size"></dd>
+                      </div>
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Operating System</dt>
+                        <dd class="text-base text-gray-900" x-text="selected.os"></dd>
+                      </div>
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Version</dt>
+                        <dd class="text-base text-gray-900" x-text="selected.version"></dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <!-- Developer Note -->
+                  <div class="bg-amber-50 rounded-xl border border-amber-200 p-6">
+                    <div class="flex items-start">
+                      <svg class="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                      <div>
+                        <h4 class="text-sm font-semibold text-amber-900 mb-1">Important Note</h4>
+                        <p class="text-sm text-amber-800" x-text="selected.devNote"></p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </template>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="mt-16 border-t border-gray-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p class="text-center text-sm text-gray-500">
+            University Software Portal • For support, contact IT Services
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      function portal() {
+        return {
+          activePage: 'home',
+          search: '',
+          selected: null,
+          
+          programs: [
+            {
+              id: 1,
+              name: "Visual Studio Community Edition",
+              version: "v2026.1",
+              size: "4.2 GB",
+              os: "Windows / macOS",
+              devNote: "Recommended for C++ development courses. Ensure you have at least 10 GB of free disk space for installation and updates.",
+              videoUrl: "https://www.youtube.com/embed/f9QZQumiC8I?si=B0RZHom18nZaNhrw",
+              downloadUrl: "https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage&cid=2500&passive=false",
+              steps: [
+                "Download the installation file from the link above",
+                "run the installer (VisualStudioSetup.exe)",
+                "then after installation, launch Visual Studio and select the Desktop development with C+ + workload and click Install",
+                "this will download and install the necessary components for C++ development",
+                "after installation, click on lunch "
+              ]
+            },
+            {
+              id: 2,
+              name: "Visual Studio Code",
+              version: "V1.109",
+              size: "120 MB",
+              os: "Windows / macOS / Linux",
+              devNote: "Recommended extensions: Python, LaTeX Workshop, GitLens, and Prettier. These can be installed from the Extensions marketplace.",
+              videoUrl: "https://www.youtube.com/embed/zK1rKC7QVwk?si=BYVpKLA90pSds6Yp",
+              downloadUrl: "https://code.visualstudio.com/docs/?dv=win64user",
+              steps: [
+                "Click the download button to visit the official VS Code website",
+                "install the downloaded file (VSCodeSetup.exe for Windows, VSCode-darwin.zip for macOS, or the appropriate package for Linux)",
+                
+              ]
+            },
+
+            {
+              id: 4,
+              name: "Autodesk AutoCAD 2024",
+              version: "2026.1.1",
+              size: "3.3 GB",
+              os: "Windows",
+              devNote: "The zip password is 123",
+              videoUrl: "",
+              downloadUrl: "https://s5-filecr.xyz/c5af63b80ac219d7?ref=320c8ddebf9beb02c847d2319ac8e881",
+              steps: [
+                "Download the AutoCAD 2024 installer from the link above",
+                "unzip the downloaded file using the password provided in the developer note Password: 123",
+                "Run the setup.exe file to start the installation process",
+                "Click 'Install Now' and wait for installation to complete",
+                "atfer installation, go to crack folder and run the AdskNLM.exe file to activate the software",
+                "Launch the installed application. In the license type selection window, click Use a network license.'"
+              ]
+            },
+            {
+              id: 5,
+              name: "Adobe Photoshop 2026",
+              version: "2026 (v27.2.0.15)",
+              size: "5.6 GB",
+              os: "Windows",
+              devNote: "the zip password is 123",
+              videoUrl: "",
+              downloadUrl: "https://s2-download.xyz/90ef7d34378c5e8c?ref=9be3f64eb499e5f6ebb58636e4de793d",
+              steps: [
+                "Download the zip file from the link above",
+                "Unzip the downloaded file using the password '123'",
+                "search for windows security and open it, then go to Virus & threat protection > Manage settings > turn off all the buttons ",
+                "run the setup.exe file to start the installation process",
+                "after installation, go to windows security and open it, then go to Virus & threat protection > Manage settings > turn on all the buttons ",
+          
+              ]
+            },
+
+          ],
+
+          get filteredPrograms() {
+            if (!this.search.trim()) {
+              return this.programs;
+            }
+            const searchLower = this.search.toLowerCase();
+            return this.programs.filter(p => 
+              p.name.toLowerCase().includes(searchLower) ||
+              p.os.toLowerCase().includes(searchLower)
+            );
+          },
+
+          viewProgram(program) {
+            this.selected = program;
+            this.activePage = 'detail';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          },
+
+          downloadProgram(program) {
+            window.open(program.downloadUrl, '_blank', 'noopener,noreferrer');
+          },
+
+          back() {
+            this.activePage = 'home';
+            this.selected = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        };
+      }
+    </script>
+  </body>
+</html>
